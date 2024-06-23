@@ -37,7 +37,6 @@ export const isAvailableLanguage = (maybeLanguage: string): maybeLanguage is Ava
 
 function splitStringWithKeys(
     inputString: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     keysObject: { [key: string]: any },
 ): string[] {
     const regex = new RegExp(`(\\{(?:${Object.keys(keysObject).join('|')})\\})`, 'g');
