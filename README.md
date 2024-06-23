@@ -10,7 +10,6 @@ This app consists of a single page of an e-commerce webshop showing some product
 issues with the shop and some open tasks to do (see below), and we would like you to solve them.
 
 Please do not spend more than 4 hours on this assignment. If you don't finish, don't worry. We are more interested in how you approach the problems and how you solve them.
-Please create a branch from master with your assignment.
 
 ### Some technical details
 

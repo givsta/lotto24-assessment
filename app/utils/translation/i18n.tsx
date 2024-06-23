@@ -4,10 +4,9 @@ const AVAILABLE_LANGUAGES = ['de'] as const;
 
 export type ExtractPlaceholderKeys<S extends string> = never;
 
-export type TranslatableArgs<German extends string> = Record<
-    ExtractPlaceholderKeys<German>,
-    string | JSX.Element
->;
+export type TranslatableArgs<German extends string> = {
+    prefix?: string;
+} & Record<ExtractPlaceholderKeys<German>, string | JSX.Element>; // and ensure the rest of the properties conform to the structure where keys are
 
 export type TranslatableReturnType<
     German extends string,
@@ -20,9 +19,8 @@ export type Translatable<German extends string, Args extends TranslatableArgs<Ge
 ) => TranslatableReturnType<German, Args>;
 
 export type TrFn = <German extends string, Args extends TranslatableArgs<German>>(
-    ...params: keyof Args extends never
-        ? [Translatable<German, Args>]
-        : [Translatable<German, Args>, Args]
+    translatable: Translatable<German, Args>,
+    args?: Args
 ) => TranslatableReturnType<German, Args>;
 
 export type Translations<German extends string> = {

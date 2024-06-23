@@ -13,7 +13,7 @@ export const AlsoBought = async () => {
                 <h2 className="text-2xl font-bold tracking-tight text-gray-900">{tr(keys.headline2)}</h2>
 
                 <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-4 lg:grid-cols-8 xl:gap-x-8">
-                    {products.map((product: any) =>
+                    {products?.map((product: any) =>
                         <div className="group relative" key={product.id}>
                             <div
                                 className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-[100px]">
