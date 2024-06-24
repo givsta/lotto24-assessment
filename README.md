@@ -1,46 +1,76 @@
-## Nextjs Case Study
+## Nextjs Case Study - Given's Thought Process
 
-### Introduction
+### API Type Hypes
+**Problem**: None of the API calls is typed. Please make sure that the responses of the API calls are validated so we are 100% sure about the type.
 
-Welcome to our case study. This case study is designed to test your ability to work with Next.js and TypeScript.
-We will be mostly looking at how you solve the problems we present to you, therefore, please also describe a bit of your thought
-process about the decisions you made in a README.
+**Solution**: First thing for me was to visit the provided API URL to see what is returned, if I know what is returned then I know what to expect.
 
-This app consists of a single page of an e-commerce webshop showing some products and a review section. There are some
-issues with the shop and some open tasks to do (see below), and we would like you to solve them.
+An example of a product from which I derived the types:
 
-Please do not spend more than 4 hours on this assignment. If you don't finish, don't worry. We are more interested in how you approach the problems and how you solve them.
+```
+{
+    "products": [
+        {
+            "id": 1,
+            "title": "Essence Mascara Lash Princess",
+            "description": "The Essence Mascara Lash Princess is a popular mascara known for its volumizing and lengthening effects. Achieve dramatic lashes with this long-lasting and cruelty-free formula.",
+            "category": "beauty",
+            "price": 9.99,
+            "discountPercentage": 7.17,
+            "rating": 4.94,
+            "stock": 5,
+            "tags": [
+                "beauty",
+                "mascara"
+            ],
+			...etc
+        }
+    ],
+    "total": 194,
+    "skip": 0,
+    "limit": 1
+}
+```
 
-### Some technical details
+Using this, I am able to determine the types for each field and type for the response.
 
-The shop uses a dummy API to fetch the products and reviews. You can find the docs for the API here: https://dummyjson.com/docs
-
-
-### Assignment
-
-First of all:
-
-1. You are not expected to write any tests for this assignment.
-2. The way things look is not so important, so don't spend too much time on styling.
-3. The documentation of the code is very scarce on purpose :), however, if something is really not clear, you can always reach out to us.
-
-### Tasks
-
-#### API Type Hypes
-None of the API calls is typed. Please make sure that the responses of the API calls are validated so we are 100% sure about the type.
-
-#### Translation Typo Turmoil
-We are using a translation implementation for the shop. The translation typing is not working properly, it seems there is a bug or maybe something is missing.
+### Translation Typo Turmoil
+**Problem**: We are using a translation implementation for the shop. The translation typing is not working properly, it seems there is a bug or maybe something is missing.
 Please fix the implementation so that typing works (as in the pic below).
 
+**Solution**: 
 
-![translation_autocomplete.png](./docs/translation_autocomplete.png)
+1. Find `tr` definition and determine it's type = `TrFn`
+2. I then worked my way to the type definition for `TrFn`
+3. Found that the type `TrFn` extends `TranslatableArgs`
+4. Added `prefix?: string` as optional to `TranslatableArgs` (this allows fellow devs to decide whether to include it or not based on the context where `tr` is called)
+5. Explicitly define the parameters `translatable` and `args` in `TrFn` instead of using a rest parameter (...params). This makes the function signature clearer and more understandable. Also, explicitly defining `args: Args` is what allows the IntelliSense magic to show us `prefix` while typing
 
-#### Page Load Lag!
-It appears that the page sometimes takes a long time to load. Can you please find out why and make sure that when the page takes a long time to load, the part that is causing the delay does not influence the rest of the page?
+```
+export type TrFn = <German extends string, Args extends TranslatableArgs<German>>(
+    translatable: Translatable<German, Args>,
+    args?: Args
+) => TranslatableReturnType<German, Args>;
+```
 
-#### Pageload Panic Fix!
-Our customers are really upset. Sometimes on page load, there is an error and the whole page breaks. Please find out the issue and make sure that all API calls handle errors gracefully. Keep type safety in mind; we want to be sure that:
+- `translatable: Translatable<German, Args>` -> Function that takes `lang` and `args` and returns a translated string or JSX element
+- `args?: Args` -> This param is an object containing the arguments for the translation, which can include placeholders and additional properties like `prefix` in our case
 
-- when an error occurs, we know it in the TSX component and know the type of the error, so we can handle it.
-- if there is no error, we have the correct type (like reviews, products) in the TSX component. Maybe you already solved this in the first task?
+### Page Load Lag!
+**Problem**: It appears that the page sometimes takes a long time to load. Can you please find out why and make sure that when the page takes a long time to load, the part that is causing the delay does not influence the rest of the page?
+
+**Solution**: Slow for me here, means perhaps a call is taking long to be resolved
+
+1. Find the naughty API call that's taking long to resolve = `getAlsoBought`
+2. Find the component where this call is being made = `<AlsoBought />`
+3. Make use of an awesome built-in React component - `<Suspense>`, and wrap our component `<AlsoBought/>` component in the `Suspense` boundary - this helps us to provide a better UX 
+4. Doing this means we will show fallback content (in my case the skeleton) while all the code and data needed by the children is being loaded.
+
+### Pageload Panic Fix!
+**Problem**: Our customers are really upset. Sometimes on page load, there is an error and the whole page breaks. Please find out the issue and make sure that all API calls handle errors gracefully. Keep type safety in mind; we want to be sure that:
+
+**Solution**: Page breaking to me may mean something is kaputt server side (backend) and is not being handling adequately on the frontend 
+
+1. Find the naughty API call that's breaking the page = `getComments`
+2. Use `try...catch` blocks (this is a JavaScript best practice, when dealing with asynchronous operations like fetching data from an API)
+3. This then allows me to handle potential network or server errors gracefully and prevent the application from entering an inconsistent or undefined state due to unhandled exceptions
